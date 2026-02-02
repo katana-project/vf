@@ -27,8 +27,8 @@ public final class ClassSource implements IContextSource {
         this.wantLibrary = wantLibrary;
     }
 
-    public static ClassSource create(String[] names, Function<String, byte[]> source, IOutputSink sink) {
-        return new ClassSource(resources(names, source), sink, false);
+    public static ClassSource create(String[] names, String[] resources, Function<String, byte[]> source, IOutputSink sink) {
+        return new ClassSource(resources(names, resources, source), sink, false);
     }
 
     @Override
@@ -71,25 +71,32 @@ public final class ClassSource implements IContextSource {
     private record ResourceData(String name, byte[] data, boolean library) {
     }
 
-    private static Map<String, ResourceData> resources(String[] names, Function<String, byte[]> source) {
+    private static Map<String, ResourceData> resources(String[] names, String[] resources, Function<String, byte[]> source) {
         final Map<String, ResourceData> res = new HashMap<>();
         for (final String name : names) {
             res.put(name, new ResourceData(name, Objects.requireNonNull(source.apply(name), "Class " + name + " not found"), false));
         }
 
-        new DependencyAnalyzer(names, res, source).analyze();
+        for (final String resource : resources) {
+            for (final String name : names) {
+                if (resource.startsWith(name + '$') && !res.containsKey(resource)) {
+                    final byte[] b = source.apply(resource);
+                    if (b == null) {
+                        continue;
+                    }
+
+                    // quick workaround for a Vineflower bug/quirk:
+                    // inner classes need to be supplied in the base source, it does not find them in the library source
+                    res.put(resource, new ResourceData(resource, b, false));
+                }
+            }
+        }
+
+        new DependencyAnalyzer(res, source).analyze();
         return res;
     }
 
-    private record DependencyAnalyzer(
-            List<String> roots,
-            Map<String, ResourceData> data,
-            Function<String, byte[]> source
-    ) {
-        DependencyAnalyzer(String[] roots, Map<String, ResourceData> data, Function<String, byte[]> source) {
-            this(List.of(roots), data, source);
-        }
-
+    private record DependencyAnalyzer(Map<String, ResourceData> data, Function<String, byte[]> source) {
         public void analyze() {
             for (final ResourceData resource : List.copyOf(data.values())) {
                 final var is = new DataInputFullStream(resource.data());
@@ -159,18 +166,8 @@ public final class ClassSource implements IContextSource {
                     return;
                 }
 
-                data.put(className, new ResourceData(className, b, !isRootDescendant(className)));
+                data.put(className, new ResourceData(className, b, true));
             }
-        }
-
-        private boolean isRootDescendant(String name) {
-            for (final String root : roots) {
-                if (name.startsWith(root + "$")) {
-                    return true;
-                }
-            }
-
-            return false;
         }
     }
 }

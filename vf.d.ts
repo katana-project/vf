@@ -13,6 +13,7 @@ declare module "@run-slicer/vf" {
 
     export interface Config {
         source?: (name: string) => Promise<Uint8Array | null>;
+        resources?: string[];
         options?: Options;
         tokenCollector?: TokenCollector;
     }

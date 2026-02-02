@@ -25,6 +25,9 @@ public interface Options extends JSObject {
     @JSBody(params = {"name"}, script = "return this.source ? this.source(name) : Promise.resolve(null);")
     JSPromise<Uint8Array> source(String name);
 
+    @JSBody(script = "return this.resources || [];")
+    String[] resources();
+
     @JSBody(script = "return this.tokenCollector || null;")
     @Nullable
     TokenCollector tokenCollector();

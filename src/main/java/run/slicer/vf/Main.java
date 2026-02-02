@@ -35,7 +35,7 @@ public class Main {
                 TextTokenVisitor.addVisitor(next -> new TextTokenCollector(next, options.tokenCollector()));
             }
 
-            final var source = ClassSource.create(names, name0 -> source0(options, name0), outputSink);
+            final var source = ClassSource.create(names, options.resources(), name0 -> source0(options, name0), outputSink);
             fernflower.addSource(source);
             fernflower.addLibrary(source.librarySource());
 
