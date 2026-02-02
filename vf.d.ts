@@ -18,5 +18,5 @@ declare module "@run-slicer/vf" {
         tokenCollector?: TokenCollector;
     }
 
-    export function decompile(names: string | string[], config?: Config): Promise<string>;
+    export function decompile(names: string | string[], config?: Config): Promise<Record<string, string>>;
 }

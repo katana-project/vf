@@ -9,10 +9,10 @@ const fs = require("fs");
 const { decompile } = require("./vf.js"); // get it from the dist/ directory or jsDelivr
 
 const data = fs.readFileSync("./your/package/HelloWorld.class"); // read a class file
-console.log(await decompile("your/package/HelloWorld", {
+const result = await decompile(["your/package/HelloWorld", /* you can decompile multiple classes at once */], {
     source: async (name) => {
         /* provide classes for analysis here, including the one you want to decompile */
-        
+
         console.log(name); /* internal name, e.g. java/lang/Object */
         return name === "your/package/HelloWorld" ? data : null /* class not available */;
     },
@@ -29,7 +29,8 @@ console.log(await decompile("your/package/HelloWorld", {
         /* useful for gathering info about placement of element references/declarations in the output */
         /* see the vf.d.ts for the API */
     },
-}));
+}); // {"your/package/HelloWorld": "decompiled source code here..."}
+console.log(result["your/package/HelloWorld"]);
 ```
 
 Or see the browser-based proof-of-concept in the [docs](./docs) directory.
