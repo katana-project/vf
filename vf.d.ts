@@ -13,10 +13,9 @@ declare module "@run-slicer/vf" {
 
     export interface Config {
         source?: (name: string) => Promise<Uint8Array | null>;
-        resources?: string[];
         options?: Options;
         tokenCollector?: TokenCollector;
     }
 
-    export function decompile(name: string, config?: Config): Promise<string>;
+    export function decompile(names: string | string[], config?: Config): Promise<string>;
 }

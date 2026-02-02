@@ -31,6 +31,11 @@ public final class MethodStubTransformer implements ClassHolderTransformer {
             case "org.jetbrains.java.decompiler.modules.decompiler.ClasspathHelper" -> {
                 this.stubWithNullConstant(cls.getMethod(new MethodDescriptor("findMethodOnClasspath", String.class, String.class, Method.class)));
             }
+            // removing threading references to stop coroutine transformation from trying to handle them
+            case "org.jetbrains.java.decompiler.util.TextBuffer$DebugTrace" -> {
+                this.stubVoid(cls.getMethod(new MethodDescriptor("ensureStarted", ValueType.VOID)));
+                this.stubVoid(cls.getMethod(new MethodDescriptor("checkLeaks", ValueType.VOID)));
+            }
         }
     }
 

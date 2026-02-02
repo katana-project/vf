@@ -80,11 +80,11 @@
                     const start = Date.now();
                     console.log(`Decompiling ${name}...`);
 
-                    document.getElementById("file-content").textContent = await decompile(name, {
+                    document.getElementById("file-content").textContent = (await decompile(name, {
                         source: async (n) => {
                             return n === name ? buf : null;
                         },
-                    });
+                    }))[name];
 
                     console.log(`Decompiled ${name} in ${Date.now() - start}ms.`);
                 };

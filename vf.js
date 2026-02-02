@@ -5,7 +5,7 @@ const wasmPath = async () => {
 };
 
 let decompileFunc = null;
-export const decompile = async (name, options) => {
+export const decompile = async (names, options) => {
     if (!decompileFunc) {
         try {
             const { load } = await import("./vf.wasm-runtime.js");
@@ -20,5 +20,5 @@ export const decompile = async (name, options) => {
         }
     }
 
-    return decompileFunc(name, options);
+    return Object.fromEntries(await decompileFunc(Array.isArray(names) ? names : [names], options));
 };
