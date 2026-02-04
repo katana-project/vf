@@ -1,15 +1,11 @@
 package run.slicer.vf.teavm;
 
+import run.slicer.vf.teavm.classlib.java.lang.TThreadLocal;
 import run.slicer.vf.teavm.classlib.java.util.concurrent.TConcurrentHashMap$KeySetView;
-import org.jetbrains.java.decompiler.main.decompiler.CancelationManager;
 import org.jetbrains.java.decompiler.main.extern.IFernflowerLogger;
 import org.jetbrains.java.decompiler.main.extern.IIdentifierRenamer;
 import org.jetbrains.java.decompiler.modules.renamer.ConverterHelper;
-import org.jetbrains.java.decompiler.struct.StructClass;
-import org.jetbrains.java.decompiler.util.DataInputFullStream;
 
-import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.util.concurrent.ConcurrentHashMap;
 
 public final class MethodDelegates {
@@ -25,11 +21,7 @@ public final class MethodDelegates {
         return new ConverterHelper();
     }
 
-    public static void org_jetbrains_java_decompiler_main_rels_ClassWrapper_killThread(Thread ignored) {
-        // emulate thread killing with a single-use cancellation checker
-        CancelationManager.setCancelationChecker(() -> {
-            CancelationManager.setCancelationChecker(() -> {});
-            CancelationManager.cancel();
-        });
+    public static void java_lang_Runtime_gc(Runtime ignored) {
+        TThreadLocal.removeAll();
     }
 }

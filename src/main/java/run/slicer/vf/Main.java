@@ -1,45 +1,53 @@
 package run.slicer.vf;
 
-import run.slicer.vf.impl.*;
 import org.jetbrains.java.decompiler.main.Fernflower;
 import org.jetbrains.java.decompiler.main.extern.IFernflowerPreferences;
 import org.jetbrains.java.decompiler.main.extern.TextTokenVisitor;
 import org.teavm.jso.JSBody;
 import org.teavm.jso.JSByRef;
 import org.teavm.jso.JSExport;
+import org.teavm.jso.core.JSMapLike;
 import org.teavm.jso.core.JSObjects;
 import org.teavm.jso.core.JSPromise;
 import org.teavm.jso.core.JSString;
 import org.teavm.jso.typedarrays.Uint8Array;
+import run.slicer.vf.impl.*;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class Main {
     @JSExport
-    public static JSPromise<JSString> decompile(String name, Options options) {
-        return decompile0(name, options == null || JSObjects.isUndefined(options) ? JSObjects.create() : options);
+    public static JSPromise<JSMapLike<JSString>> decompile(String[] names, Options options) {
+        return decompile0(names, options == null || JSObjects.isUndefined(options) ? JSObjects.create() : options);
     }
 
-    private static JSPromise<JSString> decompile0(String name, Options options) {
+    private static JSPromise<JSMapLike<JSString>> decompile0(String[] names, Options options) {
         return JSPromise.callAsync(() -> {
             final Map<String, Object> options0 = new HashMap<>(IFernflowerPreferences.DEFAULTS);
             options0.putAll(options.rawOptions());
 
-            final var outputSink = new OutputSinkImpl(name);
-
+            final var outputSink = new OutputSinkImpl();
             final var fernflower = new Fernflower(ResultSaverImpl.INSTANCE, options0, FernflowerLoggerImpl.INSTANCE);
 
             if (options.tokenCollector() != null) {
                 TextTokenVisitor.addVisitor(next -> new TextTokenCollector(next, options.tokenCollector()));
             }
 
-            fernflower.addSource(new ClassSource(name, options.resources(), name0 -> source0(options, name0), outputSink));
-            fernflower.addLibrary(new ResourceSource(options.resources(), name0 -> source0(options, name0)));
+            final var source = ClassSource.create(names, options.resources(), name0 -> source0(options, name0), outputSink);
+            fernflower.addSource(source);
+            fernflower.addLibrary(source.librarySource());
+
             fernflower.decompileContext();
             fernflower.clearContext();
+            Runtime.getRuntime().gc(); // check MethodDelegates#java_lang_Runtime_gc, to clean up TThreadLocal
 
-            return JSString.valueOf(outputSink.output());
+            final JSMapLike<JSString> output = JSObjects.create();
+            for (final var entry : outputSink.output().entrySet()) {
+                output.set(entry.getKey(), JSString.valueOf(entry.getValue()));
+            }
+
+            return output;
         });
     }
 

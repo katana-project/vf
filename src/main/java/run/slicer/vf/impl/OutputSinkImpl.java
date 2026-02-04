@@ -2,13 +2,11 @@ package run.slicer.vf.impl;
 
 import org.jetbrains.java.decompiler.main.extern.IContextSource;
 
-public final class OutputSinkImpl implements IContextSource.IOutputSink {
-    private final ThreadLocal<String> output = new ThreadLocal<>();
-    private final String name;
+import java.util.HashMap;
+import java.util.Map;
 
-    public OutputSinkImpl(String name) {
-        this.name = name;
-    }
+public final class OutputSinkImpl implements IContextSource.IOutputSink {
+    private final Map<String, String> output = new HashMap<>();
 
     @Override
     public void begin() {
@@ -16,9 +14,7 @@ public final class OutputSinkImpl implements IContextSource.IOutputSink {
 
     @Override
     public void acceptClass(String qualifiedName, String fileName, String content, int[] mapping) {
-        if (this.name.equals(qualifiedName)) {
-            this.output.set(content);
-        }
+        this.output.put(qualifiedName, content);
     }
 
     @Override
@@ -33,11 +29,7 @@ public final class OutputSinkImpl implements IContextSource.IOutputSink {
     public void close() {
     }
 
-    public String output() {
-        return this.output.get();
-    }
-
-    public String name() {
-        return this.name;
+    public Map<String, String> output() {
+        return this.output;
     }
 }
