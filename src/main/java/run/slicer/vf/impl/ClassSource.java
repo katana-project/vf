@@ -95,7 +95,11 @@ public final class ClassSource implements IContextSource {
 
     private record DependencyAnalyzer(Map<String, ResourceData> data, Function<String, byte[]> source) {
         void analyze() {
-            for (final ResourceData resource : List.copyOf(data.values())) {
+            for (final ResourceData resource : new ArrayList<>(data.values())) {
+                if (resource == null) {
+                    continue;
+                }
+
                 final var is = new DataInputFullStream(resource.data());
                 try {
                     is.discard(8); // skip magic and version
@@ -107,11 +111,18 @@ public final class ClassSource implements IContextSource {
                         }
 
                         switch (c.type) {
-                            case PooledConstant.CONSTANT_Class -> addName(((PrimitiveConstant) c).getString());
                             case PooledConstant.CONSTANT_MethodType -> addMethodType(((PrimitiveConstant) c).getString());
+                            case PooledConstant.CONSTANT_Class -> {
+                                final String name = ((PrimitiveConstant) c).getString();
+                                if (name.charAt(0) == '[') {
+                                    addType(name);
+                                } else {
+                                    addName(name);
+                                }
+                            }
                             case PooledConstant.CONSTANT_NameAndType -> {
                                 final String desc = ((LinkConstant) c).descriptor;
-                                if (desc.startsWith("(")) {
+                                if (desc.charAt(0) == '(') {
                                     addMethodType(desc);
                                 } else {
                                     addType(desc);
@@ -151,7 +162,7 @@ public final class ClassSource implements IContextSource {
                 return;
             }
 
-            if (type.startsWith("[")) {
+            if (type.charAt(0) == '[') {
                 type = type.substring(type.lastIndexOf('[') + 1);
             }
             if (type.charAt(0) == 'L' && type.charAt(type.length() - 1) == ';') {
