@@ -1,29 +1,28 @@
 package run.slicer.vf;
 
-import org.teavm.jso.JSObject;
-import org.teavm.jso.impl.JS;
-import run.slicer.vf.impl.*;
 import org.jetbrains.java.decompiler.main.Fernflower;
 import org.jetbrains.java.decompiler.main.extern.IFernflowerPreferences;
 import org.jetbrains.java.decompiler.main.extern.TextTokenVisitor;
 import org.teavm.jso.JSBody;
 import org.teavm.jso.JSByRef;
 import org.teavm.jso.JSExport;
+import org.teavm.jso.core.JSMapLike;
 import org.teavm.jso.core.JSObjects;
 import org.teavm.jso.core.JSPromise;
 import org.teavm.jso.core.JSString;
 import org.teavm.jso.typedarrays.Uint8Array;
+import run.slicer.vf.impl.*;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class Main {
     @JSExport
-    public static JSPromise<JSObject> decompile(String[] names, Options options) {
+    public static JSPromise<JSMapLike<JSString>> decompile(String[] names, Options options) {
         return decompile0(names, options == null || JSObjects.isUndefined(options) ? JSObjects.create() : options);
     }
 
-    private static JSPromise<JSObject> decompile0(String[] names, Options options) {
+    private static JSPromise<JSMapLike<JSString>> decompile0(String[] names, Options options) {
         return JSPromise.callAsync(() -> {
             final Map<String, Object> options0 = new HashMap<>(IFernflowerPreferences.DEFAULTS);
             options0.putAll(options.rawOptions());
@@ -43,16 +42,12 @@ public class Main {
             fernflower.clearContext();
             Runtime.getRuntime().gc(); // check MethodDelegates#java_lang_Runtime_gc, to clean up TThreadLocal
 
-            return JS.wrap(
-                    outputSink.output()
-                            .entrySet()
-                            .stream()
-                            .map((e) -> JS.wrap(new JSString[]{
-                                    JSString.valueOf(e.getKey()),
-                                    JSString.valueOf(e.getValue())
-                            }))
-                            .toArray()
-            );
+            final JSMapLike<JSString> output = JSObjects.create();
+            for (final var entry : outputSink.output().entrySet()) {
+                output.set(entry.getKey(), JSString.valueOf(entry.getValue()));
+            }
+
+            return output;
         });
     }
 

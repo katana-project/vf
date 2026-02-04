@@ -1,0 +1,64 @@
+diff --git a/ClassWrapper.java b/ClassWrapperPatch.java
+index 182b784..c83d44c 100644
+--- a/ClassWrapper.java
++++ b/ClassWrapperPatch.java
+@@ -27,7 +27,7 @@ import java.util.HashSet;
+ import java.util.Set;
+ import java.util.concurrent.TimeoutException;
+ 
+-public class ClassWrapper {
++public class ClassWrapperPatch { // patch
+     // Sometimes when debugging you want to be able to only analyze a specific method.
+     // When not null, this skips processing of every method except the one with the name specified.
+     private static final String DEBUG_METHOD_FILTER = null;
+@@ -37,13 +37,13 @@ public class ClassWrapper {
+     private final VBStyleCollection<Exprent, String> dynamicFieldInitializers = new VBStyleCollection<>();
+     private final VBStyleCollection<MethodWrapper, String> methods = new VBStyleCollection<>();
+ 
+-    public ClassWrapper(StructClass classStruct) {
++    public ClassWrapperPatch(StructClass classStruct) { // patch
+         this.classStruct = classStruct;
+     }
+ 
+     public void init(LanguageSpec spec) {
+         DecompilerContext.setProperty(DecompilerContext.CURRENT_CLASS, classStruct);
+-        DecompilerContext.setProperty(DecompilerContext.CURRENT_CLASS_WRAPPER, this);
++        DecompilerContext.setProperty(DecompilerContext.CURRENT_CLASS_WRAPPER, (ClassWrapper) ((Object) this)); // patch
+         DecompilerContext.getLogger().startClass(classStruct.qualifiedName);
+ 
+         int maxSec = Integer.parseInt(DecompilerContext.getProperty(IFernflowerPreferences.MAX_PROCESSING_METHOD).toString());
+@@ -73,9 +73,9 @@ public class ClassWrapper {
+ 
+             try {
+                 if (mt.containsCode()) {
+-                    if (maxSec == 0 || testMode) {
+-                        root = MethodProcessor.codeToJava(classStruct, mt, md, varProc, spec);
+-                    }
++                    // if (maxSec == 0 || testMode) {
++                    root = MethodProcessor.codeToJava(classStruct, mt, md, varProc, spec);
++                    /*}
+                     else {
+                         MethodProcessor mtProc = new MethodProcessor(classStruct, mt, md, varProc, spec, DecompilerContext.getCurrentContext());
+ 
+@@ -107,7 +107,7 @@ public class ClassWrapper {
+                         if (error == null) {
+                             root = mtProc.getResult();
+                         }
+-                    }
++                    }*/
+                 }
+                 else {
+                     boolean thisVar = !mt.hasModifier(CodeConstants.ACC_STATIC);
+@@ -211,10 +211,10 @@ public class ClassWrapper {
+         DecompilerContext.getLogger().endClass();
+     }
+ 
+-    @SuppressWarnings("deprecation")
++    /*@SuppressWarnings("deprecation")
+     private static void killThread(Thread thread) {
+         thread.stop();
+-    }
++    }*/
+ 
+     public MethodWrapper getMethodWrapper(String name, String descriptor) {
+         return methods.getWithKey(InterpreterUtil.makeUniqueKey(name, descriptor));

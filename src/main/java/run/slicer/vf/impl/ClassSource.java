@@ -6,6 +6,7 @@ import org.jetbrains.java.decompiler.struct.consts.ConstantPool;
 import org.jetbrains.java.decompiler.struct.consts.LinkConstant;
 import org.jetbrains.java.decompiler.struct.consts.PooledConstant;
 import org.jetbrains.java.decompiler.struct.consts.PrimitiveConstant;
+import org.jetbrains.java.decompiler.struct.gen.CodeType;
 import org.jetbrains.java.decompiler.struct.gen.MethodDescriptor;
 import org.jetbrains.java.decompiler.util.DataInputFullStream;
 
@@ -35,7 +36,7 @@ public final class ClassSource implements IContextSource {
     public Entries getEntries() {
         final List<Entry> entries = new ArrayList<>();
         for (final ResourceData resource : this.data.values()) {
-            if (resource.library() != this.wantLibrary) {
+            if (resource == null || resource.library() != this.wantLibrary) {
                 continue;
             }
 
@@ -80,14 +81,10 @@ public final class ClassSource implements IContextSource {
         for (final String resource : resources) {
             for (final String name : names) {
                 if (resource.startsWith(name + '$') && !res.containsKey(resource)) {
-                    final byte[] b = source.apply(resource);
-                    if (b == null) {
-                        continue;
-                    }
-
                     // quick workaround for a Vineflower bug/quirk:
                     // inner classes need to be supplied in the base source, it does not find them in the library source
-                    res.put(resource, new ResourceData(resource, b, false));
+                    final byte[] b = source.apply(resource);
+                    res.put(resource, b != null ? new ResourceData(resource, b, false) : null);
                 }
             }
         }
@@ -97,7 +94,7 @@ public final class ClassSource implements IContextSource {
     }
 
     private record DependencyAnalyzer(Map<String, ResourceData> data, Function<String, byte[]> source) {
-        public void analyze() {
+        void analyze() {
             for (final ResourceData resource : List.copyOf(data.values())) {
                 final var is = new DataInputFullStream(resource.data());
                 try {
@@ -109,10 +106,17 @@ public final class ClassSource implements IContextSource {
                             continue;
                         }
 
-                        if (c.type == PooledConstant.CONSTANT_Class || c.type == PooledConstant.CONSTANT_MethodType) {
-                            addName(((PrimitiveConstant) c).getString());
-                        } else if (c.type == PooledConstant.CONSTANT_NameAndType) {
-                            addName(((LinkConstant) c).descriptor);
+                        switch (c.type) {
+                            case PooledConstant.CONSTANT_Class -> addName(((PrimitiveConstant) c).getString());
+                            case PooledConstant.CONSTANT_MethodType -> addMethodType(((PrimitiveConstant) c).getString());
+                            case PooledConstant.CONSTANT_NameAndType -> {
+                                final String desc = ((LinkConstant) c).descriptor;
+                                if (desc.startsWith("(")) {
+                                    addMethodType(desc);
+                                } else {
+                                    addType(desc);
+                                }
+                            }
                         }
                     }
 
@@ -124,14 +128,18 @@ public final class ClassSource implements IContextSource {
         }
 
         private void addMethodType(String descriptor) {
+            if (descriptor == null || descriptor.isEmpty()) {
+                return;
+            }
+
             try {
                 final var desc = MethodDescriptor.parseDescriptor(descriptor);
                 for (final var param : desc.params) {
-                    if (param.value != null) {
+                    if (param.type == CodeType.OBJECT) {
                         addName(param.value);
                     }
                 }
-                if (desc.ret.value != null) {
+                if (desc.ret.type == CodeType.OBJECT) {
                     addName(desc.ret.value);
                 }
             } catch (Exception ignored) {
@@ -139,6 +147,10 @@ public final class ClassSource implements IContextSource {
         }
 
         private void addType(String type) {
+            if (type == null || type.isEmpty()) {
+                return;
+            }
+
             if (type.startsWith("[")) {
                 type = type.substring(type.lastIndexOf('[') + 1);
             }
@@ -148,26 +160,12 @@ public final class ClassSource implements IContextSource {
         }
 
         private void addName(String className) {
-            if (className.isEmpty()) {
+            if (className == null || className.isEmpty() || data.containsKey(className)) {
                 return;
             }
 
-            if (className.indexOf(0) == '[' || className.charAt(className.length() - 1) == ';') {
-                addType(className);
-            } else if (className.indexOf(0) == '(') {
-                addMethodType(className);
-            } else {
-                if (data.containsKey(className)) {
-                    return;
-                }
-
-                final byte[] b = source.apply(className);
-                if (b == null) {
-                    return;
-                }
-
-                data.put(className, new ResourceData(className, b, true));
-            }
+            final byte[] b = source.apply(className);
+            data.put(className, b != null ? new ResourceData(className, b, true) : null);
         }
     }
 }

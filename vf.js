@@ -20,5 +20,5 @@ export const decompile = async (names, options) => {
         }
     }
 
-    return Object.fromEntries(await decompileFunc(Array.isArray(names) ? names : [names], options));
+    return decompileFunc(Array.isArray(names) ? names : [names], options);
 };
