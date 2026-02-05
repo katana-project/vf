@@ -5,10 +5,10 @@ import org.teavm.jso.JSBody;
 import org.teavm.jso.JSExceptions;
 import org.teavm.jso.JSObject;
 
-public final class FernflowerLoggerImpl extends IFernflowerLogger {
-    public static final IFernflowerLogger INSTANCE = new FernflowerLoggerImpl();
+public final class DefaultLogger extends IFernflowerLogger {
+    public static final IFernflowerLogger INSTANCE = new DefaultLogger();
 
-    private FernflowerLoggerImpl() {
+    private DefaultLogger() {
     }
 
     @Override
@@ -16,7 +16,8 @@ public final class FernflowerLoggerImpl extends IFernflowerLogger {
         switch (severity) {
             case WARN -> warn(message);
             case ERROR -> error(message);
-            default -> {}
+            default -> {
+            }
         }
     }
 

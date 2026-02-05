@@ -11,11 +11,28 @@ declare module "@run-slicer/vf" {
         end: () => void;
     }
 
+    export type LogLevel = "trace" | "info" | "warn" | "error";
+
+    export interface Logger {
+        writeMessage: (level: LogLevel, message: string, error?: unknown) => void;
+        startProcessingClass?: (className: string) => void;
+        endProcessingClass?: () => void;
+        startReadingClass?: (className: string) => void;
+        endReadingClass?: () => void;
+        startClass?: (className: string) => void;
+        endClass?: () => void;
+        startMethod?: (methodName: string) => void;
+        endMethod?: () => void;
+        startWriteClass?: (className: string) => void;
+        endWriteClass?: () => void;
+    }
+
     export interface Config {
         source?: (name: string) => Promise<Uint8Array | null>;
         resources?: string[];
         options?: Options;
         tokenCollector?: TokenCollector;
+        logger?: Logger;
     }
 
     export function decompile(names: string | string[], config?: Config): Promise<Record<string, string>>;
