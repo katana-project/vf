@@ -31,7 +31,7 @@ const result = await decompile(["your/package/HelloWorld", /* you can decompile 
     },
     logger: {
         /* exposes the logger, defaults to writing to the console if not present */
-        /* see the vf.d.ts for the API */
+        /* see the vf.d.ts file for the API */
     },
 }); // {"your/package/HelloWorld": "decompiled source code here..."}
 console.log(result["your/package/HelloWorld"]);
