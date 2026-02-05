@@ -15,6 +15,7 @@ import run.slicer.vf.impl.*;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class Main {
     @JSExport
@@ -28,7 +29,8 @@ public class Main {
             options0.putAll(options.rawOptions());
 
             final var outputSink = new OutputSinkImpl();
-            final var fernflower = new Fernflower(ResultSaverImpl.INSTANCE, options0, FernflowerLoggerImpl.INSTANCE);
+            final var logger = options.logger() != null ? new OptionLogger(Objects.requireNonNull(options.logger())) : DefaultLogger.INSTANCE;
+            final var fernflower = new Fernflower(ResultSaverImpl.INSTANCE, options0, logger);
 
             if (options.tokenCollector() != null) {
                 TextTokenVisitor.addVisitor(next -> new TextTokenCollector(next, options.tokenCollector()));

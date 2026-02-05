@@ -32,6 +32,10 @@ public interface Options extends JSObject {
     @Nullable
     TokenCollector tokenCollector();
 
+    @JSBody(script = "return this.logger || null;")
+    @Nullable
+    Logger logger();
+
     interface Option extends JSObject {
         @JSBody(script = "return this[0];")
         String name();
@@ -64,5 +68,43 @@ public interface Options extends JSObject {
 
         @JSBody(script = "this.end();")
         void end();
+    }
+
+    /**
+     * {@link org.jetbrains.java.decompiler.main.extern.IFernflowerLogger}
+     */
+    interface Logger extends JSObject {
+        @JSBody(params = {"level", "message", "error"}, script = "this.writeMessage(level, message, error);")
+        void writeMessage(String level, String message, JSObject error);
+
+        @JSBody(params = {"className"}, script = "if (this.startProcessingClass) this.startProcessingClass(className);")
+        void startProcessingClass(String className);
+
+        @JSBody(script = "if (this.endProcessingClass) this.endProcessingClass();")
+        void endProcessingClass();
+
+        @JSBody(params = {"className"}, script = "if (this.startReadingClass) this.startReadingClass(className);")
+        void startReadingClass(String className);
+
+        @JSBody(script = "if (this.endReadingClass) this.endReadingClass();")
+        void endReadingClass();
+
+        @JSBody(params = {"className"}, script = "if (this.startClass) this.startClass(className);")
+        void startClass(String className);
+
+        @JSBody(script = "if (this.endClass) this.endClass();")
+        void endClass();
+
+        @JSBody(params = {"methodName"}, script = "if (this.startMethod) this.startMethod(methodName);")
+        void startMethod(String methodName);
+
+        @JSBody(script = "if (this.endMethod) this.endMethod();")
+        void endMethod();
+
+        @JSBody(params = {"className"}, script = "if (this.startWriteClass) this.startWriteClass(className);")
+        void startWriteClass(String className);
+
+        @JSBody(script = "if (this.endWriteClass) this.endWriteClass();")
+        void endWriteClass();
     }
 }
