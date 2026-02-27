@@ -47,7 +47,7 @@ This is needed to prevent the decompiler from having to make asynchronous calls 
 The aforementioned analyzer does not create a complete, transitive dependency graph, as that would require way more classes to be loaded into memory than necessary.
 This approach is sufficient for the decompiler to work, but it *may* worsen the quality of the decompiled code in some cases, notably:
 - generic type casts and intersection type resolution
-- try-with-resources resugaring
+- enhanced for loop and try-with-resources resugaring
 - and possibly more
 
 ## Licensing
