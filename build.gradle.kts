@@ -71,14 +71,20 @@ tasks {
         description = "Copies the necessary files to the dist directory for distribution."
         dependsOn(generateJavaScript)
 
-        from(
-            "README.md", "LICENSE", "LICENSE-VF", "vf.js", "vf.d.ts",
-            copyWasmGCRuntime, generateWasmGC
-        )
+        from("README.md", "LICENSE", "LICENSE-VF", "vf.js", "vf.d.ts", generateWasmGC)
         into("dist")
 
         duplicatesStrategy = DuplicatesStrategy.INCLUDE
 
+        doLast {
+            copy {
+                from("src/main/resources")
+                into("dist")
+                rename("runtime.js", "vf.wasm-runtime.js")
+
+                duplicatesStrategy = DuplicatesStrategy.INCLUDE
+            }
+        }
         doLast {
             copy {
                 from(generateJavaScript)
