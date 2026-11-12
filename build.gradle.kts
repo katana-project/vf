@@ -40,16 +40,18 @@ java.toolchain {
 val debugging = false // set to true if you want an unobfuscated build for debugging
 teavm {
     js {
-        mainClass = "run.slicer.vf.Main"
+        mainClass = "run.slicer.vf.JSMain"
         moduleType = JSModuleType.ES2015
         obfuscated = !debugging
         if (debugging) {
             optimization = OptimizationLevel.NONE
         }
+
+        asyncEnabled = true
     }
 
     wasmGC {
-        mainClass = "run.slicer.vf.Main"
+        mainClass = "run.slicer.vf.WASMMain"
         modularRuntime = true
         obfuscated = !debugging
         disassembly = debugging
