@@ -573,11 +573,14 @@ function jsoImports(imports, context, stringBuiltins) {
         const paramsAsString = paramsForString.join(", ");
         return new Function("rethrowJavaAsJs", "checkAlive", "fn", `return function(${paramsAsString}) {\n` +
             `    checkAlive();\n` +
-            `    try {\n` +
-            `        return WebAssembly.promising(fn)(${params.join(', ')});\n` + // patch: promising wrapper
+            // patch start: promising wrapper
+            /*`    try {\n` +
+            `        return fn(${params.join(', ')});\n` +
             `    } catch (e) {\n` +
             `        rethrowJavaAsJs(e);\n` +
-            `    }\n` +
+            `    }\n` +*/
+            `    return WebAssembly.promising(fn)(${params.join(', ')}).catch(rethrowJavaAsJs);` +
+            // patch end: promising wrapper
             `};`)(rethrowJavaAsJs, checkAliveFn, fn);
     }
     function renameConstructor(name, c) {
