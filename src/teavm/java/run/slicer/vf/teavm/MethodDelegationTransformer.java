@@ -12,6 +12,7 @@ public final class MethodDelegationTransformer implements ClassHolderTransformer
     private final Map<String, Set<String>> DELEGATED_METHODS = Map.of(
             "java.util.concurrent.ConcurrentHashMap", Set.of("newKeySet"),
             "org.jetbrains.java.decompiler.main.Fernflower", Set.of("loadHelper"),
+            "org.jetbrains.java.decompiler.struct.StructContext", Set.of("getSentinel"),
             "java.lang.Runtime", Set.of("gc"),
             "org.vineflower.kt.metadata.ProtoBuf$VersionRequirementTable", Set.of("toBuilder"),
             "org.vineflower.kt.metadata.ProtoBuf$Contract", Set.of("toBuilder", "newBuilder"),

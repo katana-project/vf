@@ -21,8 +21,11 @@ public interface Options extends JSObject {
         return options;
     }
 
+    @JSBody(params = {"name"}, script = "return this.source ? this.source(name) : null;")
+    Uint8Array source(String name);
+
     @JSBody(params = {"name"}, script = "return this.source ? this.source(name) : Promise.resolve(null);")
-    JSPromise<Uint8Array> source(String name);
+    JSPromise<Uint8Array> sourceAsync(String name);
 
     @JSBody(script = "return this.resources || [];")
     String[] resources();
