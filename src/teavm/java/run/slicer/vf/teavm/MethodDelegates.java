@@ -1,5 +1,7 @@
 package run.slicer.vf.teavm;
 
+import org.jetbrains.java.decompiler.struct.StructClass;
+import org.jetbrains.java.decompiler.util.DataInputFullStream;
 import org.vineflower.kt.metadata.ProtoBuf;
 import org.vineflower.kt.metadata.ProtoBuf$Contract$Builder;
 import org.vineflower.kt.metadata.ProtoBuf$Expression$Builder;
@@ -12,6 +14,8 @@ import org.jetbrains.java.decompiler.main.extern.IFernflowerLogger;
 import org.jetbrains.java.decompiler.main.extern.IIdentifierRenamer;
 import org.jetbrains.java.decompiler.modules.renamer.ConverterHelper;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.concurrent.ConcurrentHashMap;
 
 public final class MethodDelegates {
@@ -25,6 +29,37 @@ public final class MethodDelegates {
 
     public static IIdentifierRenamer org_jetbrains_java_decompiler_main_Fernflower_loadHelper(String ignored, IFernflowerLogger ignored1) {
         return new ConverterHelper();
+    }
+
+    public static StructClass org_jetbrains_java_decompiler_struct_StructContext_getSentinel() {
+        class Holder {
+            /**
+             * public class VFSentinel {
+             * }
+             */
+            static final byte[] SENTINEL = {
+                    (byte) 0xca, (byte) 0xfe, (byte) 0xba, (byte) 0xbe,
+                    0x00, 0x00, 0x00, 0x41, 0x00, 0x0a, 0x0a, 0x00, 0x02, 0x00, 0x03, 0x07, 0x00, 0x04, 0x0c, 0x00,
+                    0x05, 0x00, 0x06, 0x01, 0x00, 0x10, 0x6a, 0x61, 0x76, 0x61, 0x2f, 0x6c, 0x61, 0x6e, 0x67, 0x2f,
+                    0x4f, 0x62, 0x6a, 0x65, 0x63, 0x74, 0x01, 0x00, 0x06, 0x3c, 0x69, 0x6e, 0x69, 0x74, 0x3e, 0x01,
+                    0x00, 0x03, 0x28, 0x29, 0x56, 0x07, 0x00, 0x08, 0x01, 0x00, 0x0a, 0x56, 0x46, 0x53, 0x65, 0x6e,
+                    0x74, 0x69, 0x6e, 0x65, 0x6c, 0x01, 0x00, 0x04, 0x43, 0x6f, 0x64, 0x65, 0x00, 0x21, 0x00, 0x07,
+                    0x00, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x01, 0x00, 0x05, 0x00, 0x06, 0x00, 0x01,
+                    0x00, 0x09, 0x00, 0x00, 0x00, 0x11, 0x00, 0x01, 0x00, 0x01, 0x00, 0x00, 0x00, 0x05, 0x2a, (byte) 0xb7,
+                    0x00, 0x01, (byte) 0xb1, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+            };
+
+            static final StructClass SENTINEL_CLASS;
+            static {
+                try {
+                    SENTINEL_CLASS = StructClass.create(new DataInputFullStream(SENTINEL), false);
+                } catch (IOException e) {
+                    throw new UncheckedIOException(e);
+                }
+            }
+        }
+
+        return Holder.SENTINEL_CLASS;
     }
 
     public static void java_lang_Runtime_gc(Runtime ignored) {
