@@ -8,6 +8,10 @@ let decompileFunc = null;
 export const decompile = async (names, options) => {
     if (!decompileFunc) {
         try {
+            if (typeof WebAssembly.Suspending === "undefined" || typeof WebAssembly.promising === "undefined") {
+                throw new Error("JSPI is not supported in this environment");
+            }
+
             const { load } = await import("./vf.wasm-runtime.js");
             const { exports } = await load(await wasmPath());
 

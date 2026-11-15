@@ -37,17 +37,6 @@ const result = await decompile(["your/package/HelloWorld", /* you can decompile 
 console.log(result["your/package/HelloWorld"]);
 ```
 
-## Notes
-
-This project leverages a dependency analyzer to determine which classes are needed for decompilation and pre-fetch them before decompilation begins.
-This is needed to prevent the decompiler from having to make asynchronous calls to fetch classes during decompilation, which would require a costly coroutine transformation of the decompiler code.
-
-The aforementioned analyzer does not create a complete, transitive dependency graph, as that would require way more classes to be loaded into memory than necessary.
-This approach is sufficient for the decompiler to work, but it *may* worsen the quality of the decompiled code in some cases, notably:
-- generic type casts and intersection type resolution
-- enhanced for loop and try-with-resources resugaring
-- and possibly more
-
 ## Licensing
 
 The supporting code for this project is licensed under the [MIT License](./LICENSE).

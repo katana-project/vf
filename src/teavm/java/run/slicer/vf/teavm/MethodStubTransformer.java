@@ -9,15 +9,10 @@ import java.lang.reflect.Method;
 
 public final class MethodStubTransformer implements ClassHolderTransformer {
     private static final ValueType STRUCT_CONTEXT = ValueType.object("org.jetbrains.java.decompiler.struct.StructContext");
-    private static final ValueType STRUCT_CLASS = ValueType.object("org.jetbrains.java.decompiler.struct.StructClass");
 
     @Override
     public void transformClass(ClassHolder cls, ClassHolderTransformerContext context) {
         switch (cls.getName()) {
-            case "org.jetbrains.java.decompiler.struct.StructContext" -> {
-                // ConcurrentHashMaps don't usually allow null values, but in TeaVM they do, so just patch this to return null
-                this.stubWithNullConstant(cls.getMethod(new MethodDescriptor("getSentinel", STRUCT_CLASS)));
-            }
             case "org.jetbrains.java.decompiler.main.plugins.JarPluginLoader" -> {
                 this.stubVoid(cls.getMethod(new MethodDescriptor("init", void.class)));
             }
