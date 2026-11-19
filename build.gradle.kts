@@ -6,7 +6,7 @@ plugins {
     alias(libs.plugins.teavm) // order matters?
 }
 
-val thisVersion = "0.6.4"
+val thisVersion = "0.7.0"
 
 group = "run.slicer"
 version = "$thisVersion-${libs.versions.vineflower.get()}"
